@@ -3,11 +3,8 @@
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 Actor::Actor(int id, double x, double y, int di, int graphD, double s, int vS, int hS, char sta, int h, bool coll)
-: GraphObject(id, x, y)
+: GraphObject(id, x, y, di, s, graphD)
 {
-    direction = di;
-    graphDep = graphD;
-    size = s;
     vSpeed = vS;
     hSpeed = hS;
     state = sta;

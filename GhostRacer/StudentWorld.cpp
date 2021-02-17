@@ -1,6 +1,8 @@
 #include "StudentWorld.h"
 #include "GameConstants.h"
+#include "Actor.h"
 #include <string>
+#include <vector>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -17,8 +19,14 @@ StudentWorld::StudentWorld(string assetPath)
 
 int StudentWorld::init()
 {
-    gr = new GhostRacer(IID_GHOST_RACE, 128, 32);
-    
+    gr = new GhostRacer(IID_GHOST_RACER, 128, 32);
+    int N = VIEW_HEIGHT / SPRITE_HEIGHT;
+    int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
+    int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
+    for (int j =0;j<N;j++){
+        actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, LEFT_EDGE,j * SPRITE_HEIGHT));
+        actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, RIGHT_EDGE,j * SPRITE_HEIGHT));
+    }
     return GWSTATUS_CONTINUE_GAME;
 }
 

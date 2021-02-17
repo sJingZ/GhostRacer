@@ -2,7 +2,9 @@
 #define STUDENTWORLD_H_
 
 #include "GameWorld.h"
+#include "Actor.h"
 #include <string>
+#include <vector>
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
@@ -16,6 +18,7 @@ public:
 
 private:
     GhostRacer* gr;
+    std::vector<Actor *> actors;
 };
 
 #endif // STUDENTWORLD_H_

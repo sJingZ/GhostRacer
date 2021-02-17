@@ -8,16 +8,13 @@ class Actor: public GraphObject
 {
 public:
     Actor(int id, double x, double y, int di, int graphD, double size, int vS, int hS, char sta, int h, bool coll);
-    virtual ~Actor();
-    virtual void doSomething();
+    virtual ~Actor(){return;};
+    virtual void doSomething(){return;};
     int getVSpeed() const {return vSpeed;}
     int getHSpeed() const {return hSpeed;}
     void setState(char newState){state = newState;}
 
 private:
-    int direction;
-    int graphDep;
-    double size;
     int vSpeed;
     int hSpeed;
     char state;

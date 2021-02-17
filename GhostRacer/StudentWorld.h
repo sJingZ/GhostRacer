@@ -19,6 +19,8 @@ public:
 private:
     GhostRacer* gr;
     std::vector<Actor *> actors;
+    Actor* lastYellow;
+    Actor* lastWhite;
 };
 
 #endif // STUDENTWORLD_H_

@@ -85,7 +85,7 @@ void GhostRacer::RacerMove()
 {
     double max_shift_per_tick = 4.0;
     int direction = getDirection();
-    double delta_x = cos(direction)*max_shift_per_tick;
+    double delta_x = cos(direction*3.14159/180)*max_shift_per_tick;
     int cur_x = getX();
     int cur_y = getY();
     moveTo(cur_x + delta_x, cur_y);
@@ -109,6 +109,7 @@ void BorderLine::doSomething()
     int new_x = getX();
     new_x += horiz_speed;
     moveTo(new_x, new_y);
+    return;
     if (new_x < 0 || new_y < 0 ||
         new_x > VIEW_WIDTH || new_y > VIEW_HEIGHT){
         setState(DEAD);

@@ -19,23 +19,41 @@ StudentWorld::StudentWorld(string assetPath)
 
 int StudentWorld::init()
 {
-    gr = new GhostRacer(IID_GHOST_RACER, 128, 32);
+    gr = new GhostRacer(IID_GHOST_RACER, 128, 32, this);
     int N = VIEW_HEIGHT / SPRITE_HEIGHT;
     int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
     int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
-    for (int j =0;j<N;j++){
-        actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, LEFT_EDGE,j * SPRITE_HEIGHT));
-        actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, RIGHT_EDGE,j * SPRITE_HEIGHT));
+    for (int j=0;j<N;j++){
+        actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, LEFT_EDGE,j * SPRITE_HEIGHT, gr));
+        actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, RIGHT_EDGE,j * SPRITE_HEIGHT, gr));
+    }
+    
+    int M = VIEW_HEIGHT / (4*SPRITE_HEIGHT);
+    for (int j=0;j<M;j++){
+        actors.push_back(new BorderLine(IID_WHITE_BORDER_LINE, LEFT_EDGE + ROAD_WIDTH/3,j * (4*SPRITE_HEIGHT),gr));
+        actors.push_back(new BorderLine(IID_WHITE_BORDER_LINE, RIGHT_EDGE - ROAD_WIDTH/3,j * (4*SPRITE_HEIGHT), gr));
     }
     return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move()
 {
-    // This code is here merely to allow the game to build, run, and terminate after you hit enter.
-    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-    decLives();
-    return GWSTATUS_PLAYER_DIED;
+    if (gr->getState() == ALIVE){
+        gr->doSomething();
+    }
+//    vector<Actor *>::iterator it;
+//    it = actors.begin();
+//    while (it != actors.end()){
+//        if ((*it)->getState() == ALIVE){
+//            (*it)->doSomething();
+//            // if gr destroyed...
+//            // if gr completed level...
+//        }
+//    }
+    // remove dead actor
+    // add new actors
+    // update text
+    return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp()

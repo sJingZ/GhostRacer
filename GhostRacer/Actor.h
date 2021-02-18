@@ -12,7 +12,7 @@ const int DEAD = 0;
 class Actor: public GraphObject
 {
 public:
-    Actor(int id, double x, double y, int di, int graphD, double size, int vS, int hS, char sta, int h, bool coll);
+    Actor(int id, double x, double y, int dir,  double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll);
     virtual ~Actor(){return;}
     virtual void doSomething() = 0;
     int getVSpeed() const {return vSpeed;}
@@ -30,11 +30,6 @@ private:
     bool collAvoid;
 };
 
-class Pedestrian: public Actor
-{
-public:
-};
-
 class GhostRacer: public Actor
 {
 public:
@@ -45,6 +40,16 @@ private:
     int holySpray;
     StudentWorld* sw;
 };
+
+class Pedestrian: public Actor
+{
+public:
+    Pedestrian(int id, double x, double y, GhostRacer* ptr2gr);
+    virtual void doSomething();
+private:
+    GhostRacer* GhostR;
+};
+
 
 class Goodie: public Actor
 {
@@ -60,4 +65,15 @@ private:
     GhostRacer* GhostR;
 };
 
+bool overlap(Actor &a, Actor &b){
+    unsigned int delta_x = a.getX() - b.getX();
+    unsigned int delta_y = a.getY() - b.getY();
+    unsigned int radius_sum = a.getRadius() + b.getRadius();
+    if (delta_x < radius_sum*0.25 && delta_y < radius_sum * 0.6){
+        return true;
+    }
+    else{return false;}
+}
+
 #endif // ACTOR_H_
+*

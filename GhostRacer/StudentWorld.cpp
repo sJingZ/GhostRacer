@@ -49,8 +49,8 @@ int StudentWorld::move()
             (*it)->doSomething();
             // if gr destroyed...
             // if gr completed level...
-            it++;
         }
+        it++;
     }
     
     // remove dead actors

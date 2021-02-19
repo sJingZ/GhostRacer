@@ -21,6 +21,7 @@ public:
     int getState(){return state;}
     void setHit(int damage){hit -= damage;}
     void setVSpeed(int new_speed) {vSpeed = new_speed;}
+    void setHSpeed(int new_hSpeed) {hSpeed = new_hSpeed;}
 
 private:
     int vSpeed;
@@ -36,6 +37,7 @@ public:
     GhostRacer(int id, double x, double y, StudentWorld* ptr2sw);
     virtual void doSomething();
     void RacerMove();
+    StudentWorld* getSW(){return sw;}
 private:
     int holySpray;
     StudentWorld* sw;
@@ -46,8 +48,10 @@ class Pedestrian: public Actor
 public:
     Pedestrian(int id, double x, double y, GhostRacer* ptr2gr);
     virtual void doSomething();
+    void PedMove();
 private:
     GhostRacer* GhostR;
+    int MovePlan;
 };
 
 
@@ -65,15 +69,5 @@ private:
     GhostRacer* GhostR;
 };
 
-bool overlap(Actor &a, Actor &b){
-    unsigned int delta_x = a.getX() - b.getX();
-    unsigned int delta_y = a.getY() - b.getY();
-    unsigned int radius_sum = a.getRadius() + b.getRadius();
-    if (delta_x < radius_sum*0.25 && delta_y < radius_sum * 0.6){
-        return true;
-    }
-    else{return false;}
-}
 
 #endif // ACTOR_H_
-*

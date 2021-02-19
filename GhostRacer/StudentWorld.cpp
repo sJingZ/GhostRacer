@@ -27,13 +27,16 @@ int StudentWorld::init()
         actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, LEFT_EDGE,j * SPRITE_HEIGHT, gr));
         actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, RIGHT_EDGE,j * SPRITE_HEIGHT, gr));
     }
-    lastYellow = actors[actors.size()-1];
     int M = VIEW_HEIGHT / (4*SPRITE_HEIGHT);
     for (int j=0;j<M;j++){
         actors.push_back(new BorderLine(IID_WHITE_BORDER_LINE, LEFT_EDGE + ROAD_WIDTH/3,j * (4*SPRITE_HEIGHT),gr));
         actors.push_back(new BorderLine(IID_WHITE_BORDER_LINE, RIGHT_EDGE - ROAD_WIDTH/3,j * (4*SPRITE_HEIGHT), gr));
     }
     lastWhite = actors[actors.size()-1];
+    lastWhite_y = actors[actors.size()-1]->getY();
+    // here I hard-coded location of human ped -- CHANGE LATER!
+    actors.push_back(new Pedestrian(IID_HUMAN_PED, 10, 50, gr));
+//    cout << "at first, the actor size is " << actors.size() << endl;
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -52,10 +55,13 @@ int StudentWorld::move()
         }
         it++;
     }
+//    cout << "FINISHed looping through actors -- now begin removal" << endl;
     
     // remove dead actors
-    while (it != actors.end()){
+    it = actors.begin();
+    for (;it != actors.end();){
         if ((*it)->getState() == DEAD){
+            delete *it;
             it = actors.erase(it);
             // if gr destroyed...
             // if gr completed level...
@@ -65,9 +71,11 @@ int StudentWorld::move()
         }
     }
     
+//    cout << "finished removal -- now begin adding" << endl;
+
     // add new actors
     int new_border_y = VIEW_HEIGHT - SPRITE_HEIGHT;
-    int delta_y = new_border_y - lastWhite->getY();
+    int delta_y = new_border_y - lastWhite_y;
     if (delta_y >= SPRITE_HEIGHT){
         actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, ROAD_CENTER - ROAD_WIDTH/2, new_border_y, gr));
         actors.push_back(new BorderLine(IID_YELLOW_BORDER_LINE, ROAD_CENTER + ROAD_WIDTH/2, new_border_y, gr));
@@ -76,7 +84,9 @@ int StudentWorld::move()
         actors.push_back(new BorderLine(IID_WHITE_BORDER_LINE, ROAD_CENTER - ROAD_WIDTH / 2 + ROAD_WIDTH/3, new_border_y, gr));
         actors.push_back(new BorderLine(IID_WHITE_BORDER_LINE, ROAD_CENTER + ROAD_WIDTH / 2 - ROAD_WIDTH/3, new_border_y, gr));
         lastWhite = actors[actors.size()-1];
+        lastWhite_y = actors[actors.size()-1]->getY();
     }
+//    cout << "end of move" << endl;
     // update text
     return GWSTATUS_CONTINUE_GAME;
 }

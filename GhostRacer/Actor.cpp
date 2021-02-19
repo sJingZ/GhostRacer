@@ -1,5 +1,7 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+#include "GameConstants.h"
+using namespace std;
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 Actor::Actor(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll)
@@ -13,7 +15,7 @@ Actor::Actor(int id, double x, double y, int dir, double size, unsigned int grap
 }
 
 GhostRacer::GhostRacer(int id, double x, double y, StudentWorld* ptr2sw)
-: Actor(id, x, y, 90, 4.0, 0, 0, 0, ALIVE, 100, true)
+: Actor(id, x, y, 90, 4.0, 0, 0, NULL, ALIVE, 100, true)
 {
     sw = ptr2sw;
     holySpray = 10;
@@ -83,8 +85,8 @@ void GhostRacer::RacerMove()
     double delta_x = max_shift_per_tick * cos(direction*3.14159/180);
     double cur_x = getX();
     double cur_y = getY();
-//    std::cout << delta_x << std::endl;
-//    std::cout << cur_x << std::endl;
+    
+    sw->setLastWhite(-4-getVSpeed());
     moveTo(cur_x + delta_x, cur_y);
 }
 
@@ -95,15 +97,45 @@ BorderLine::BorderLine(int id, double x, double y, GhostRacer* ptr2gr)
     GhostR = ptr2gr;
 }
 
+
 void BorderLine::doSomething()
 {
-    int vert_speed = getVSpeed();
-    vert_speed -= GhostR->getVSpeed();
+
+    int vert_speed = getVSpeed() - GhostR->getVSpeed();
     int horiz_speed = getHSpeed();
-    int new_y = getY();
-    new_y += vert_speed;
-    int new_x = getX();
-    new_x += horiz_speed;
+    int new_y = getY() + vert_speed;
+    int new_x = getX() + horiz_speed;
+    moveTo(new_x, new_y);
+
+    if (getX() < 0 || getY() < 0 ||
+        getX() > VIEW_WIDTH || getY() > VIEW_HEIGHT){
+        setState(DEAD);
+        return;
+    }
+}
+
+bool overlap(Actor &a, Actor &b){
+    unsigned int delta_x = a.getX() - b.getX();
+    unsigned int delta_y = a.getY() - b.getY();
+    unsigned int radius_sum = a.getRadius() + b.getRadius();
+    if (delta_x < radius_sum*0.25 && delta_y < radius_sum * 0.6){
+        return true;
+    }
+    else{return false;}
+}
+
+Pedestrian::Pedestrian(int id, double x, double y, GhostRacer* ptr2gr)
+: Actor(id, x, y, 0, 2.0, 0, -4, 0, ALIVE, 2, true)
+{
+    GhostR = ptr2gr;
+    MovePlan = 0;
+}
+
+void Pedestrian::PedMove(){
+    int vert_speed = getVSpeed() - GhostR->getVSpeed();
+    int horiz_speed = getHSpeed();
+    int new_y = getY() + vert_speed;
+    int new_x = getX() + horiz_speed;
     moveTo(new_x, new_y);
     if (new_x < 0 || new_y < 0 ||
         new_x > VIEW_WIDTH || new_y > VIEW_HEIGHT){
@@ -112,16 +144,27 @@ void BorderLine::doSomething()
     }
 }
 
-Pedestrian::Pedestrian(int id, double x, double y, GhostRacer* ptr2gr)
-: Actor(id, x, y, 0, 2.0, 0, -4, 0, ALIVE, 2, true)
-{
-    GhostR = ptr2gr;
-}
-
 void Pedestrian::doSomething()
 {
     if (getState() != ALIVE){return;}
-    if (overlap(this, GhostR)){
-        
+    if (overlap(*this, *GhostR)){
+        StudentWorld* SW = GhostR->getSW();
+        SW->decLives();
+        return;
+    }
+    PedMove();
+    MovePlan--;
+    if (MovePlan > 0){return;}
+    else{
+        int new_hS;
+        do {
+            new_hS = randInt(-3, 3);
+        } while (new_hS == 0);
+        setHSpeed(new_hS);
+        MovePlan = randInt(4, 32);
+        if (new_hS < 0){setDirection(180);}
+        else{setDirection(0);}
     }
 }
+
+

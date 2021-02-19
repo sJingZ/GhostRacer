@@ -15,12 +15,13 @@ public:
     virtual int init();
     virtual int move();
     virtual void cleanUp();
+    void setLastWhite(int delta_y){lastWhite_y+=delta_y;}
 
 private:
     GhostRacer* gr;
     std::vector<Actor *> actors;
-    Actor* lastYellow;
     Actor* lastWhite;
+    int lastWhite_y;
 };
 
 #endif // STUDENTWORLD_H_

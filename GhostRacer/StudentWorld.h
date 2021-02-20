@@ -12,16 +12,18 @@ class StudentWorld : public GameWorld
 {
 public:
     StudentWorld(std::string assetPath);
+    virtual ~StudentWorld();
     virtual int init();
     virtual int move();
     virtual void cleanUp();
     void setLastWhite(int delta_y){lastWhite_y+=delta_y;}
+    void decHumanPed();
 
 private:
     GhostRacer* gr;
     std::vector<Actor *> actors;
-    Actor* lastWhite;
     int lastWhite_y;
+    bool PedDied;
 };
 
 #endif // STUDENTWORLD_H_

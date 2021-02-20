@@ -4,7 +4,7 @@
 using namespace std;
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
-Actor::Actor(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll)
+Actor::Actor(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll, GhostRacer* gr)
 : GraphObject(id, x, y, dir, size, graphD)
 {
     vSpeed = vS;
@@ -12,13 +12,15 @@ Actor::Actor(int id, double x, double y, int dir, double size, unsigned int grap
     state = sta;
     hit = h;
     collAvoid = coll;
+    GhostR = gr;
 }
 
 GhostRacer::GhostRacer(int id, double x, double y, StudentWorld* ptr2sw)
-: Actor(id, x, y, 90, 4.0, 0, 0, NULL, ALIVE, 100, true)
+: Actor(id, x, y, 90, 4.0, 0, 0, NULL, ALIVE, 100, true, nullptr)
 {
     sw = ptr2sw;
     holySpray = 10;
+    clc = true;
 }
 
 void GhostRacer::doSomething()
@@ -90,28 +92,49 @@ void GhostRacer::RacerMove()
     moveTo(cur_x + delta_x, cur_y);
 }
 
-
-BorderLine::BorderLine(int id, double x, double y, GhostRacer* ptr2gr)
-: Actor(id, x, y, 0, 2.0, 1, -4, 0, ALIVE, NULL, false)
-{
-    GhostR = ptr2gr;
+void GhostRacer::spin(){
+    int new_direction;
+    int prev_dir = getDirection();
+    if (clc)
+    {
+        do {
+        new_direction = prev_dir + randInt(5, 20);
+        } while (new_direction < 60 || new_direction > 120);
+        setDirection(new_direction);
+            
+    }
 }
 
+BorderLine::BorderLine(int id, double x, double y, GhostRacer* ptr2gr)
+: Actor(id, x, y, 0, 2.0, 1, -4, 0, ALIVE, NULL, false, ptr2gr)
+{
+//    GhostR = ptr2gr;
+}
+
+void UpdatePos(Actor* a)
+{
+    int vert_speed = a->getVSpeed() - a->getGR()->getVSpeed();
+    int horiz_speed = a->getHSpeed();
+    int new_y = a->getY() + vert_speed;
+    int new_x = a->getX() + horiz_speed;
+    a->moveTo(new_x, new_y);
+}
+
+bool isOutOfBoud(Actor *a){
+    if (a->getX() < 0 || a->getY() < 0 ||
+        a->getX() > VIEW_WIDTH || a->getY() > VIEW_HEIGHT)
+    {
+        a->setState(DEAD);
+        return true;
+    }
+    else {return false;}
+}
 
 void BorderLine::doSomething()
 {
-
-    int vert_speed = getVSpeed() - GhostR->getVSpeed();
-    int horiz_speed = getHSpeed();
-    int new_y = getY() + vert_speed;
-    int new_x = getX() + horiz_speed;
-    moveTo(new_x, new_y);
-
-    if (getX() < 0 || getY() < 0 ||
-        getX() > VIEW_WIDTH || getY() > VIEW_HEIGHT){
-        setState(DEAD);
+    UpdatePos(this);
+    if (isOutOfBoud(this))
         return;
-    }
 }
 
 bool overlap(Actor &a, Actor &b){
@@ -125,21 +148,14 @@ bool overlap(Actor &a, Actor &b){
 }
 
 Pedestrian::Pedestrian(int id, double x, double y, GhostRacer* ptr2gr)
-: Actor(id, x, y, 0, 2.0, 0, -4, 0, ALIVE, 2, true)
+: Actor(id, x, y, 0, 2.0, 0, -4, 0, ALIVE, 2, true, ptr2gr)
 {
-    GhostR = ptr2gr;
     MovePlan = 0;
 }
 
 void Pedestrian::PedMove(){
-    int vert_speed = getVSpeed() - GhostR->getVSpeed();
-    int horiz_speed = getHSpeed();
-    int new_y = getY() + vert_speed;
-    int new_x = getX() + horiz_speed;
-    moveTo(new_x, new_y);
-    if (new_x < 0 || new_y < 0 ||
-        new_x > VIEW_WIDTH || new_y > VIEW_HEIGHT){
-        setState(DEAD);
+    UpdatePos(this);
+    if (isOutOfBoud(this)){
         return;
     }
 }
@@ -147,9 +163,11 @@ void Pedestrian::PedMove(){
 void Pedestrian::doSomething()
 {
     if (getState() != ALIVE){return;}
-    if (overlap(*this, *GhostR)){
-        StudentWorld* SW = GhostR->getSW();
-        SW->decLives();
+    if (overlap(*this, *getGR())){
+        setState(DEAD);
+        getGR()->setState(DEAD);
+        StudentWorld* SW = getGR()->getSW();
+        SW->decHumanPed();
         return;
     }
     PedMove();
@@ -168,3 +186,18 @@ void Pedestrian::doSomething()
 }
 
 
+OilSlick::OilSlick(int id, double x, double y, double si, GhostRacer* ptr2gr)
+:Actor(id, x, y, 0, si, 1, -4, 0, ALIVE, 0, false, ptr2gr)
+{
+}
+
+void OilSlick::doSomething(){
+    UpdatePos(this);
+    if (isOutOfBoud(this)){
+        return;
+    }
+    if(overlap(*this, *getGR())){
+        getGR()->getSW()->playSound(SOUND_OIL_SLICK);
+        getGR()->spin();
+    }
+}

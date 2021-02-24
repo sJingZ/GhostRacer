@@ -26,7 +26,7 @@ bool is_directory(string path)
   // replace the string literal with a full path name to the directory,
   // e.g., "Z:/CS32/GhostRacer/Assets" or "/Users/fred/cs32/GhostRacer/Assets"
 
-const string assetDirectory = "/Users/jingzou/Desktop/Winter_Junior_2101-2103/CS32/GhostRacer/DerivedData/GhostRacer/Build/Products/Debug/Assets";
+const string assetDirectory = "/Users/jingzou/Desktop/Winter_Junior_2101-2103/CS32/proj3/GR_0223/GhostRacer 2/DerivedData/GhostRacer/Build/Products/Debug/Assets";
 
 class GameWorld;
 

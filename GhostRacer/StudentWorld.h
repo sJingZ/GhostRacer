@@ -18,11 +18,15 @@ public:
     virtual void cleanUp();
     void setLastWhite(int delta_y){lastWhite_y+=delta_y;}
     void decHumanPed();
-    void addSpray(Actor* s);
+    void addNewActor(Actor* act);
     void setSouls2Save(int delta){souls2save += delta;}
     int getSouls(){return souls2save;}
     int getBonus(){return bonus;}
-
+    std::vector<Actor *> getActorsAffectedBySpray();
+    Actor* closestActorNearZomCab(Actor* zomcab);
+    bool findClosestCollAvoidActor(int leftOfLane);
+    int chooseLaneForZomCab();
+    
 private:
     GhostRacer* gr;
     std::vector<Actor *> actors;

@@ -86,10 +86,10 @@
 				B7930DAE25E533FA007FEE03 /* GameController.h */,
 				B7930DA825E533FA007FEE03 /* GameWorld.cpp */,
 				B7930DAA25E533FA007FEE03 /* GameWorld.h */,
+				B7930DAD25E533FA007FEE03 /* SpriteManager.h */,
 				B7930DAC25E533FA007FEE03 /* GraphObject.h */,
 				B7930DA925E533FA007FEE03 /* main.cpp */,
 				B7930DA625E533FA007FEE03 /* SoundFX.h */,
-				B7930DAD25E533FA007FEE03 /* SpriteManager.h */,
 				4B91F8BE2033F3F8003AFA78 /* StudentWorld.h */,
 			);
 			path = GhostRacer;

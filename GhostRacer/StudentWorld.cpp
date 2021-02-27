@@ -11,7 +11,7 @@ const int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
 
 GameWorld* createStudentWorld(string assetPath)
 {
-	return new StudentWorld(assetPath);
+    return new StudentWorld(assetPath);
 }
 
 // Students:  Add code to this file, StudentWorld.h, Actor.h, and Actor.cpp
@@ -43,54 +43,81 @@ std::vector<Actor *> StudentWorld::getActorsAffectedBySpray(){
     while(ite != actors.end()){
         if ((*ite)->getIfAffectedBySpray()){
             actorsCanBeAffected.push_back(*ite);
+//            (*ite)->printClass();
         }
         ite++;
     }
     return actorsCanBeAffected;
 }
 
-Actor* StudentWorld::closestActorNearZomCab(Actor* zomcab){
-    int leftOfZomCabLane = zomcab->getX()-ROAD_WIDTH/3;
-    int rightOfZomCabLane = zomcab->getX()+ROAD_WIDTH/3;
+bool StudentWorld::isInSameLane(Actor* a, double leftOfLane){
+    int rightOfLane = leftOfLane+ROAD_WIDTH/3; // compute the right edge from the left edge
+    if (a->getCollAvoid() && // actor is collision-avoidance worthy
+        a->getX() < rightOfLane && a->getX() > leftOfLane) // actor in the same lane
+        {return true;}
+    else
+        {return false;}
+}
+
+
+Actor* StudentWorld::hasActorInFront(Actor* zomcab){
+    Actor* closestActor = nullptr;
     
     vector<Actor *>::iterator it;
     it = actors.begin();
-    int min_dist = VIEW_HEIGHT; // initialize the distance between actors
+    int LeftOfZomLane = zomcab->getX()-ROAD_WIDTH/6; // left edge of zombie cab's lane
+    
     while(it != actors.end()){
-        if ((*it)->getX() <= rightOfZomCabLane &&
-            (*it)->getX() >= leftOfZomCabLane &&
-            (*it) != zomcab){
-            cout << "something in the same lane" << endl;
+        if (isInSameLane(*it, LeftOfZomLane) &&
+            (*it) != zomcab &&// and it is not the cab itself
+            (*it) != gr && // and it is not the racer
+            (*it)->getY() > zomcab->getY() && // the actor is in front of zombie cab
+            (*it)->getY() < zomcab->getY()+96){ // but it is less than 96 pixels in front of zombie cab
+            cout << "something in the same lane in front of zombie cab" << endl;
+//            (*it)->printClass();
+            return (*it);
         }
         it++;
     }
-    return gr;
+    return closestActor;
 }
 
-bool StudentWorld::findClosestCollAvoidActor(int leftOfLane){
-//    int minDistanceToEdge = VIEW_HEIGHT;
-//    Actor* closestActor = nullptr;
-    cout << "start find coll avoid actor" << endl;
+Actor* StudentWorld::hasActorAfter(Actor* zomcab){
+    int leftOfZomCabLane = zomcab->getX()-ROAD_WIDTH/6;
+    Actor* closestActor = nullptr;
+
     
+    vector<Actor *>::iterator it;
+    it = actors.begin();
+//    int min_dist = VIEW_HEIGHT; // initialize the distance between actors
     
-    // check if ghost racer is in front
-    if (gr->getX() >= leftOfLane &&
-        gr->getX() <= leftOfLane+ROAD_WIDTH/3){
-        cout << "ghost racer is before cab when cab is initiated" << endl;
-        return true;
+    while(it != actors.end()){
+        if (isInSameLane(*it, leftOfZomCabLane) &&
+            (*it) != zomcab && // and it is not the cab itself
+            (*it) != gr && // and it is not the racer
+            (*it)->getY() < zomcab->getY() && // the actor is after zombie cab
+            (*it)->getY() > zomcab->getY()-96){ // but it is less than 96 pixels after zombie cab
+            cout << "something in the same lane after zombie cab, and";
+//            (*it)->printClass();
+            return (*it);
+        }
+        it++;
     }
+    return closestActor;
+}
+
+bool StudentWorld::hasActorAtBottomOfScreen(int leftOfLane){
+    cout << "start find coll avoid actor at bottom" << endl;
     
     vector<Actor *>::iterator it;
     it = actors.begin();
     
     while (it != actors.end()){
-        if ((*it)->getCollAvoid() && // it is a collision avoidance-worthy actor
-            (*it)->getX() >= leftOfLane && // it is on the lane we chose
-            (*it)->getX() <= leftOfLane+ROAD_WIDTH/3 &&
+        if (isInSameLane(*it, leftOfLane) &&
             (*it)->getY() <= (VIEW_HEIGHT / 3) // its Y cood is not greater than VIEW_HEIGHT / 3
             ){
             cout << "there is an actor before cab when cab is initiated" << endl;
-            (*it)->printClass();
+//            (*it)->printClass();
 //            if ((*it)->getY() < minDistanceToEdge){
 //                minDistanceToEdge = (*it)->getY();
 //                closestActor = *it;
@@ -99,44 +126,99 @@ bool StudentWorld::findClosestCollAvoidActor(int leftOfLane){
         it++;
     }
     
-    cout << "no actor in front" << endl;
+    cout << "no actor at bottom" << endl;
+    return false;
+}
+
+bool StudentWorld::hasActorAtTopOfScreen(int leftOfLane){
+    cout << "start find coll avoid actor at top" << endl;
+    
+    
+    // there is no need to check if ghost racer is in the lane since it always stays at the bottom
+        
+    vector<Actor *>::iterator it;
+    it = actors.begin();
+    
+    while (it != actors.end()){
+        if (isInSameLane(*it, leftOfLane) &&
+            (*it)->getY() >= (VIEW_HEIGHT * 2/3) // its Y cood is less than (VIEW_HEIGHT * 2 / 3), meaning it is close to the top
+            ){
+            cout << "there is an actor after cab when cab is initiated" << endl;
+//            (*it)->printClass();
+            return true; // this lane is not a candidate lane
+        }
+        it++;
+    }
+    
+    cout << "no actor at top" << endl;
     return false;
 }
 
 
-int StudentWorld::chooseLaneForZomCab(){
+void StudentWorld::chooseLaneForZomCab(){
+    
     cout << "start to choose a lane for zombie cab" << endl;
     int cur_lane = randInt(0, 2); // 0 is left, 1 is middle, 2 is right lane
     cout << "cur_lane is: " << cur_lane << endl;
+    int randDelta = randInt(2, 4);
     switch (cur_lane) {
         case 0:{ // start from left lane
             for (int i=0; i<3; i++){
-                cout << "start left lane iter: " << i << endl;
-                if(!findClosestCollAvoidActor(LEFT_EDGE + i*ROAD_WIDTH/3)){
+//                cout << "start left lane iter: " << i << endl;
+                if(!hasActorAtBottomOfScreen(LEFT_EDGE + i*ROAD_WIDTH/3)){
                     // there is no such actor in candidate lane, or it has a Y greater than VIEW_HEIGHT/3
-                    cout << "found a lane" << endl;
-                    return LEFT_EDGE + i*ROAD_WIDTH/3 + ROAD_WIDTH/6;
+                    // found a spot for cab at bottom
+//                    cout << "found a lane at bottom" << endl;
+                    actors.push_back(new ZomCab(IID_ZOMBIE_CAB, LEFT_EDGE + i*ROAD_WIDTH/3 + ROAD_WIDTH/6, SPRITE_HEIGHT/2, gr, gr->getVSpeed()+randDelta));
+                    return;
                 }
+                
+                if(!hasActorAtTopOfScreen(LEFT_EDGE + i*ROAD_WIDTH/3)){
+                    // there is no such actor in candidate lane, or it has a Y less than VIEW_HEIGHT* 2/3
+                    // found a spot for cab at top
+//                    cout << "found a lane at top" << endl;
+                    actors.push_back(new ZomCab(IID_ZOMBIE_CAB, LEFT_EDGE + i*ROAD_WIDTH/3 + ROAD_WIDTH/6, VIEW_HEIGHT - SPRITE_HEIGHT/2, gr, gr->getVSpeed()-randDelta));
+                    return;
+                }
+                
             }
             break;
         }
+            
         case 1:{ // start from middle lane
             int lane[3] = {1,2,0}; // try middle first, then right, then left lane
             for (int i=0; i<3; i++){
-                cout << "start middle lane iter: " << i << endl;
-                if(!findClosestCollAvoidActor(LEFT_EDGE + lane[i]*ROAD_WIDTH/3)){
-                    cout << "found a lane" << endl;
-                    return LEFT_EDGE + lane[i]*ROAD_WIDTH/3 + ROAD_WIDTH/6;
+//                cout << "start middle lane iter: " << i << endl;
+                if(!hasActorAtBottomOfScreen(LEFT_EDGE + lane[i]*ROAD_WIDTH/3)){
+                    // found a spot for cab at bottom
+//                    cout << "found a lane at bottom" << endl;
+                    actors.push_back(new ZomCab(IID_ZOMBIE_CAB, LEFT_EDGE + lane[i]*ROAD_WIDTH/3 + ROAD_WIDTH/6, SPRITE_HEIGHT/2, gr, gr->getVSpeed()+randDelta));
+                    return;
+                }
+                if(!hasActorAtTopOfScreen(LEFT_EDGE + lane[i]*ROAD_WIDTH/3)){
+                    // found a spot for cab at top
+//                    cout << "found a lane at top" << endl;
+                    actors.push_back(new ZomCab(IID_ZOMBIE_CAB, LEFT_EDGE + lane[i]*ROAD_WIDTH/3 + ROAD_WIDTH/6, VIEW_HEIGHT - SPRITE_HEIGHT / 2, gr, gr->getVSpeed()-randDelta));
+                    return;
                 }
             }
             break;
         }
+            
         case 2:{ // start from right lane
             for (int i=2; i>=0; i--){
-                cout << "start right lane iter: " << i << endl;
-                if(!findClosestCollAvoidActor(LEFT_EDGE + i*ROAD_WIDTH/3)){
-                    cout << "found a lane" << endl;
-                    return LEFT_EDGE + i*ROAD_WIDTH/3 + ROAD_WIDTH/6;
+//                cout << "start right lane iter: " << i << endl;
+                if(!hasActorAtBottomOfScreen(LEFT_EDGE + i*ROAD_WIDTH/3)){
+                    // found a spot for cab at bottom
+//                    cout << "found a lane at bottom" << endl;
+                    actors.push_back(new ZomCab(IID_ZOMBIE_CAB,LEFT_EDGE + i*ROAD_WIDTH/3 + ROAD_WIDTH/6, SPRITE_HEIGHT / 2, gr, gr->getVSpeed()+randDelta));
+                    return;
+                }
+                if(!hasActorAtTopOfScreen(LEFT_EDGE + i*ROAD_WIDTH/3)){
+                    // found a spot for cab at top
+//                    cout << "found a lane at top" << endl;
+                    actors.push_back(new ZomCab(IID_ZOMBIE_CAB,LEFT_EDGE + i*ROAD_WIDTH/3 + ROAD_WIDTH/6, VIEW_HEIGHT - SPRITE_HEIGHT / 2, gr, gr->getVSpeed()-randDelta));
+                    return;
                 }
             }
             break;
@@ -144,8 +226,6 @@ int StudentWorld::chooseLaneForZomCab(){
         default:
             break;
     }
-    
-    return -1;
 }
 
 
@@ -156,6 +236,7 @@ int StudentWorld::init()
     PedDied = false;
     souls2save = getLevel()*2 + 5;
     gr = new GhostRacer(IID_GHOST_RACER, 128, 32, this);
+    actors.push_back(gr);
     bonus = 5000;
 
     // add border line
@@ -172,16 +253,13 @@ int StudentWorld::init()
     lastWhite_y = actors[actors.size()-1]->getY();
     
     /////// ONLY USED FOR TESTING ZOMBIE CAB -- DELETE LATER /////////
-    actors.push_back(new forTestZomCab(IID_HUMAN_PED, 53 + ROAD_WIDTH/6 , 50, gr)); // put at left lane
+//    actors.push_back(new forTestZomCab(IID_HUMAN_PED, 53 + ROAD_WIDTH/6 , 50, gr)); // put at left lane
     
     return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move()
 {
-    if (gr->getState() == ALIVE){
-        gr->doSomething();
-    }
     vector<Actor *>::iterator it;
     it = actors.begin();
     while (it != actors.end()){
@@ -281,14 +359,10 @@ int StudentWorld::move()
     int ChanceVehicle = max(100 - L*10, 20);
     int randZomCab = randInt(0, ChanceVehicle);
     if (randZomCab == 0){
-        int ZomCabX = chooseLaneForZomCab();
-        cout << ZomCabX << endl;
-        if (ZomCabX != -1){
-            actors.push_back(new ZomCab(IID_ZOMBIE_CAB, ZomCabX, 0, gr));
-        }
+        cout << "randzomcab = 0, so start to insert cab" << endl;
+        chooseLaneForZomCab();
     }
     
-
 ////////////////// UPDATE TEXT ////////////////////
     int score = getScore();
     int souls = getSouls();
@@ -304,14 +378,12 @@ int StudentWorld::move()
     setGameStatText(gameStatBar);
     
     bonus--;
+//    cout << "Tick ends //////////////////////////////////////////////" << endl;
     return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp()
 {
-    if (gr){
-        delete gr;
-    }
     vector<Actor *>::iterator it;
     it = actors.begin();
     while (it != actors.end()){

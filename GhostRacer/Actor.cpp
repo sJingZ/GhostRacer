@@ -4,9 +4,9 @@
 #include <vector>
 using namespace std;
 
-//////////////////////// ACTOR //////////////////////////////
+//////////////////////// ACTOR ////////////////////////////////////////////////////////
 
-Actor::Actor(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll, bool forSpray)
+Actor::Actor(int id, double x, double y, int dir, double size, unsigned int graphD, double vS, double hS, int sta, int h, bool coll, bool forSpray)
 : GraphObject(id, x, y, dir, size, graphD)
 {
     vSpeed = vS;
@@ -17,7 +17,7 @@ Actor::Actor(int id, double x, double y, int dir, double size, unsigned int grap
     canBeAffectedBySpray = forSpray;
 }
 
-//////////////////////// HELPER FUNCTIONS //////////////////////////////
+//////////////////////// HELPER FUNCTIONS //////////////////////////////////////////////
 
 
 void UpdatePos(Actor* a, GhostRacer* ptr2gr)
@@ -51,7 +51,7 @@ bool overlap(Actor *a, Actor *b){
 }
 
 
-//////////////////////// GHOST RACER //////////////////////////////
+//////////////////////// GHOST RACER //////////////////////////////////////////////////
 
 
 GhostRacer::GhostRacer(int id, double x, double y, StudentWorld* ptr2sw)
@@ -68,7 +68,7 @@ void GhostRacer::isDamaged(int sound, int damage){
     }
     else{
         setDead();
-        getSW()->playSound(SOUND_PLAYER_DIE);
+//        getSW()->playSound(SOUND_PLAYER_DIE);
     }
     
 }
@@ -101,7 +101,6 @@ void GhostRacer::doSomething()
     if(sw->getKey(ch)){
         switch (ch) {
             case KEY_PRESS_LEFT:
-                // move counterclockwise
                 if (racer_direction < 114){
                     setDirection(racer_direction + 8);
                 }
@@ -117,6 +116,7 @@ void GhostRacer::doSomething()
                     double x = getX();
                     double y = getY();
                     double dir = getDirection();
+                    getSW()->playSound(SOUND_PLAYER_SPRAY);
                     Actor* s;
                     s = new Spray(IID_HOLY_WATER_PROJECTILE, x, y, dir, this);
                     getSW()->addNewActor(s);
@@ -124,13 +124,11 @@ void GhostRacer::doSomething()
                 break;
             }
             case KEY_PRESS_UP:
-                // speed up
                 if (speed < 5){
                     setVSpeed(speed+1);
                 }
                 break;
             case KEY_PRESS_DOWN:
-                // slow down
                 if (speed > -1){
                     setVSpeed(speed-1);
                 }
@@ -146,7 +144,6 @@ void GhostRacer::RacerMove()
 {
     double max_shift_per_tick = 4.0;
     double direction = getDirection();
-//    cout << "direction is " << direction << endl;
     double delta_x = max_shift_per_tick * cos(direction*3.14159/180);
     double cur_x = getX();
     double cur_y = getY();
@@ -163,7 +160,6 @@ void GhostRacer::spin(){
         do {
         new_direction = prev_dir + randInt(5, 20);
         } while (new_direction <= 60 || new_direction >= 120);
-//        cout << "new direction is " << new_direction << endl;
         setDirection(new_direction);
     }
     else
@@ -171,12 +167,11 @@ void GhostRacer::spin(){
         do {
         new_direction = prev_dir - randInt(5, 20);
         } while (new_direction <= 60 || new_direction >= 120);
-//        cout << "new direction is " << new_direction << endl;
         setDirection(new_direction);
     }
 }
 
-//////////////////////// BORDER LINE //////////////////////////////
+//////////////////////// BORDER LINE ////////////////////////////////////////////////
 
 
 BorderLine::BorderLine(int id, double x, double y, GhostRacer* ptr2gr)
@@ -194,7 +189,7 @@ void BorderLine::doSomething()
             return;
 }
 
-//////////////////////// HEALING GOODIE //////////////////////////////
+//////////////////////// HEALING GOODIE /////////////////////////////////////////////
 HealingGoodie::HealingGoodie(int id, double x, double y, GhostRacer* ptr2gr)
 : Actor(id, x, y, 0, 1.0, 2, -4, 0, ALIVE, 0, false, true)
 {
@@ -221,10 +216,10 @@ void HealingGoodie::affectedBySpray(){
 
 
 
-//////////////////////// PED //////////////////////////////
+//////////////////////// PED ////////////////////////////////////////////////////////
 
 
-Pedestrian::Pedestrian(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll, int mvplan, GhostRacer* ptr2gr)
+Pedestrian::Pedestrian(int id, double x, double y, int dir, double size, unsigned int graphD, double vS, double hS, int sta, int h, bool coll, int mvplan, GhostRacer* ptr2gr)
 : Actor(id, x, y, dir, size, graphD, vS, hS, sta, h, coll, true)
 {
     MovePlan = mvplan;
@@ -252,7 +247,7 @@ void Pedestrian::PedMove(){
     }
 }
 
-//////////////////////// HUMAN PED //////////////////////////////
+//////////////////////// HUMAN PED //////////////////////////////////////////////
 
 HumanPedestrian::HumanPedestrian(int id, double x, double y, GhostRacer* ptr2gr)
 : Pedestrian(id, x, y, 0, 2.0, 0, -4, 0, ALIVE, 2, true, 0, ptr2gr)
@@ -289,7 +284,6 @@ void ZoomPedestrian::isNearGR()
     int delta = getX();
     delta -= getGR()->getX();
     if (delta < -30 || delta > 30) {return;}
-//    cout << "delta is " << delta << endl;
     setDirection(270);
     if (delta == 0)
     {setHSpeed(0);}
@@ -314,12 +308,14 @@ void ZoomPedestrian::affectedBySpray(){
         getGR()->getSW()->increaseScore(150);
         
         // add a new healing goodie
-        int ChanceOfHealingGoodie = randInt(0, 5);
-//        int ChanceOfHealingGoodie = 0;
+        int ChanceOfHealingGoodie = randInt(0, 4);
         if (ChanceOfHealingGoodie == 0){
             Actor* healingGoodie = new HealingGoodie(IID_HEAL_GOODIE, getX(), getY(), getGR());
             getGR()->getSW()->addNewActor(healingGoodie);
         }
+    }
+    if(getHit() > 0){
+        getGR()->getSW()->playSound(SOUND_PED_HURT);
     }
 }
 
@@ -336,7 +332,7 @@ void ZoomPedestrian::doSomething()
         return;
     }
     
-    // determine relative pos to racer
+    // determine if near ghost racer
     isNearGR();
     PedMove();
 }
@@ -386,44 +382,7 @@ void HolyWater::doSomething(){
     }
 }
 
-//////////////////////// SPRAY //////////////////////////////
 
-Spray::Spray(int id, double x, double y, double dir, GhostRacer* ptr2gr)
-:Actor(id, x, y, dir, 1.0, 1, 0, 0, ALIVE, 0, false, false)
-{
-    GhostR = ptr2gr;
-    max_dis = 160;
-    activated = false;
-}
-
-void Spray::isActivated(){
-//    cout << "check activation" << endl;
-    vector<Actor *> actors2Check = GhostR->getSW()->getActorsAffectedBySpray();
-//    cout << "got actors 2 check" << endl;
-    for (vector<Actor *>::iterator it = actors2Check.begin();
-         it != actors2Check.end();
-         it++){
-        if(overlap(this, *it)){
-            setDead();
-            (*it)->affectedBySpray();
-            return;
-        }
-    }
-}
-
-void Spray::doSomething(){
-    if (getState() != ALIVE){return;}
-    isActivated();
-    moveForward(SPRITE_HEIGHT);
-    if(isOutOfBoud(this)){
-        return;
-    }
-    if (max_dis < 0){
-        setDead();
-        return;
-    }
-    max_dis -= SPRITE_HEIGHT;
-}
 
 //////////////////////// SOUL //////////////////////////////
 
@@ -451,8 +410,8 @@ void Soul::doSomething(){
 
 
 //////////////////////// ZOOMBIE CAB //////////////////////////////
-ZomCab::ZomCab(int id, double x, double y, GhostRacer* ptr2gr)
-: Actor(id, x, y, 90, 4.0, 0, 0, 0, ALIVE, 3, true, true)
+ZomCab::ZomCab(int id, double x, double y, GhostRacer* ptr2gr, double startSpeed)
+: Actor(id, x, y, 90, 4.0, 0, startSpeed, 0, ALIVE, 3, true, true)
 {
     GhostR = ptr2gr;
     hasHurtGR = false;
@@ -464,22 +423,65 @@ void ZomCab::doSomething(){
     if(!hasHurtGR && overlap(this, GhostR)){ // has not damaged the ghost racer and overlaps
         GhostR->isDamaged(SOUND_VEHICLE_CRASH, 20);
         int delta = getX() - GhostR->getX();
-        if (delta <= 0){
+        if (delta <= 0){ // to the left of racer or at same x
             setHSpeed(-5);
-            setDirection(60 - randInt(0, 20));
+            setDirection(120 + randInt(0, 20));
         }
         else{
             setHSpeed(5);
-            setDirection(120 + randInt(0, 20));
+            setDirection(60 - randInt(0, 20));
         }
         hasHurtGR = true;
     }
     UpdatePos(this, GhostR);
     if (isOutOfBoud(this)){return;}
-//    GhostR->getSW()->closestActorNearZomCab(this);
+    if (getVSpeed() > GhostR->getVSpeed() &&
+        GhostR->getSW()->hasActorInFront(this)){
+        cout << "since there is actor in front, the speed changes from " << getVSpeed();
+        setVSpeed(getVSpeed()-0.5);
+        cout << " to new v speed: " << getVSpeed() << endl;
+            return;
+    }
+    else if(GhostR->getSW()->hasActorAfter(this)){
+        cout << "since there is actor after, the speed changes from " << getVSpeed();
+        setVSpeed(getVSpeed()+0.5);
+        cout << " to new v speed: " << getVSpeed() << endl;
+        return;
+    }
+    planLength--;
+    if(planLength > 0){return;}
+    else{
+        planLength = randInt(4, 32);
+        int randNewSpeed = randInt(-2, 2);
+        setVSpeed(getVSpeed() + randNewSpeed);
+    }
 }
 
 
+void ZomCab::affectedBySpray(){
+    cout << "zomcab is affected, and its current hit is" << endl;
+    setHit(1);
+    
+    if(getHit() <= 0){
+        cout << endl;
+        cout << "zomcab should be dead now" << endl;
+        setDead();
+        GhostR->getSW()->playSound(SOUND_VEHICLE_DIE);
+        GhostR->getSW()->increaseScore(200);
+        
+        // add a new oil slick
+        int ChanceOfOilSlick = randInt(0, 4);
+//        int ChanceOfOilSlick = 0;
+        if (ChanceOfOilSlick == 0){
+            int randSize = randInt(2, 5);
+            Actor* o = new OilSlick(IID_OIL_SLICK, getX(), getY(), randSize, GhostR);
+            GhostR->getSW()->addNewActor(o);
+        }
+    }
+    else{
+        GhostR->getSW()->playSound(SOUND_VEHICLE_HURT);
+    }
+}
 
 ///////// THIS IS ONLY USED FOR TESTING ZOMBIE CAR DELETE LATER //////////////
 forTestZomCab::forTestZomCab(int id, double x, double y, GhostRacer* ptr2gr)
@@ -488,3 +490,44 @@ forTestZomCab::forTestZomCab(int id, double x, double y, GhostRacer* ptr2gr)
     
 }
 
+//////////////////////// SPRAY //////////////////////////////
+
+Spray::Spray(int id, double x, double y, double dir, GhostRacer* ptr2gr)
+:Actor(id, x, y, dir, 1.0, 1, 0, 0, ALIVE, 0, false, false)
+{
+    GhostR = ptr2gr;
+    max_dis = 160;
+    activated = false;
+}
+
+void Spray::isActivated(){
+//    cout << "check activation" << endl;
+    vector<Actor *> actors2Check = GhostR->getSW()->getActorsAffectedBySpray();
+//    cout << "got actors 2 check" << endl;
+    for (vector<Actor *>::iterator it = actors2Check.begin();
+         it != actors2Check.end();
+         it++){
+        if(overlap(this, *it)){
+            setDead();
+            cout << endl;
+            cout << "overlap with: ";
+//            (*it)->printClass();
+            (*it)->affectedBySpray();
+            return;
+        }
+    }
+}
+
+void Spray::doSomething(){
+    if (getState() != ALIVE){return;}
+    isActivated();
+    moveForward(SPRITE_HEIGHT);
+    if(isOutOfBoud(this)){
+        return;
+    }
+    if (max_dis < 0){
+        setDead();
+        return;
+    }
+    max_dis -= SPRITE_HEIGHT;
+}

@@ -23,9 +23,17 @@ public:
     int getSouls(){return souls2save;}
     int getBonus(){return bonus;}
     std::vector<Actor *> getActorsAffectedBySpray();
-    Actor* closestActorNearZomCab(Actor* zomcab);
-    bool findClosestCollAvoidActor(int leftOfLane);
-    int chooseLaneForZomCab();
+    
+    //// Functions for zombie cab ///////
+    bool isInSameLane(Actor* a, double leftOfLane); // check if collision avoid actor in the same lane
+    bool hasActorAtBottomOfScreen(int leftOfLane); // check if actor at bottom when creating cab
+    bool hasActorAtTopOfScreen(int leftOfLane); // check if actor at top when creating cab
+    Actor* hasActorInFront(Actor* zomcab); // check if actor in front of cab when cab running
+    Actor* hasActorAfter(Actor* zomcab); // check if actor after cab when cab running
+    void chooseLaneForZomCab(); // choose a lane and create a cab
+
+
+
     
 private:
     GhostRacer* gr;

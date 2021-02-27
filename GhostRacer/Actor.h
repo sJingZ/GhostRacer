@@ -12,29 +12,31 @@ using namespace std;
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 class GhostRacer;
 
+
+//////////////// DELETE PRINT CLASS LATER /////////////////////////
 class Actor: public GraphObject
 {
 public:
-    Actor(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll, bool forSpray);
+    Actor(int id, double x, double y, int dir, double size, unsigned int graphD, double vS, double hS, int sta, int h, bool coll, bool forSpray);
     virtual ~Actor(){return;}
     virtual void doSomething() = 0;
-    int getVSpeed() const {return vSpeed;}
-    int getHSpeed() const {return hSpeed;}
+    double getVSpeed() const {return vSpeed;}
+    double getHSpeed() const {return hSpeed;}
     void setDead(){state = DEAD;}
     int getState(){return state;}
     void setHit(int damage){hit -= damage;}
-    void setVSpeed(int new_speed) {vSpeed = new_speed;}
-    void setHSpeed(int new_hSpeed) {hSpeed = new_hSpeed;}
+    void setVSpeed(double new_speed) {vSpeed = new_speed;}
+    void setHSpeed(double new_hSpeed) {hSpeed = new_hSpeed;}
 //    GhostRacer* getGR(){return GhostR;}
     int getHit(){return hit;}
     bool getIfAffectedBySpray(){return canBeAffectedBySpray;}
     virtual void affectedBySpray() = 0;
     bool getCollAvoid(){return collAvoid;}
-    virtual void printClass()=0;
+//    virtual void printClass()=0;
     
 private:
-    int vSpeed;
-    int hSpeed;
+    double vSpeed;
+    double hSpeed;
     int state;
     int hit;
     bool collAvoid;
@@ -54,7 +56,7 @@ public:
     int getHoly(){return holySpray;}
     virtual void affectedBySpray(){};
     void isDamaged(int sound, int damage);
-    virtual void printClass(){std::cout << "this is a racer" << endl;}
+//    virtual void printClass(){std::cout << "this is a racer" << endl;}
 
 private:
     int holySpray;
@@ -64,13 +66,13 @@ private:
 class Pedestrian: public Actor
 {
 public:
-    Pedestrian(int id, double x, double y, int dir, double size, unsigned int graphD, int vS, int hS, int sta, int h, bool coll, int mvplan, GhostRacer* ptr2gr);
+    Pedestrian(int id, double x, double y, int dir, double size, unsigned int graphD, double vS, double hS, int sta, int h, bool coll, int mvplan, GhostRacer* ptr2gr);
     virtual void doSomething() = 0;
     int getMovePlan(){return MovePlan;}
     GhostRacer* getGR(){return GhostR;}
     void PedMove();
     virtual void affectedBySpray() = 0;
-    virtual void printClass()=0;
+//    virtual void printClass()=0;
 
 private:
     GhostRacer* GhostR;
@@ -85,10 +87,10 @@ public:
     virtual void doSomething();
     void HumanPedMove();
     virtual void affectedBySpray();
-    virtual void printClass(){cout << "this is a human ped" << endl;}
+//    virtual void printClass(){cout << "this is a human ped" << endl;}
 
 private:
-    int MovePlan;
+//    int MovePlan;
 };
 
 
@@ -100,12 +102,12 @@ public:
     void ZoomPedMove();
     void isNearGR();
     virtual void affectedBySpray();
-    virtual void printClass(){cout << "this is a zombie ped" << endl;}
+//    virtual void printClass(){cout << "this is a zombie ped" << endl;}
 
 
 private:
     GhostRacer* GhostR;
-    int MovePlan;
+//    int MovePlan;
     int tickBeforeGrunt;
 };
 
@@ -116,7 +118,7 @@ public:
     BorderLine(int id, double x, double y, GhostRacer* ptr2gr);
     virtual void doSomething();
     virtual void affectedBySpray(){};
-    virtual void printClass(){cout << "this is a borderline" << endl;}
+//    virtual void printClass(){cout << "this is a borderline" << endl;}
 
 private:
     GhostRacer* GhostR;
@@ -128,7 +130,7 @@ public:
     OilSlick(int id, double x, double y, double si, GhostRacer* ptr2gr);
     virtual void doSomething();
     virtual void affectedBySpray(){};
-    virtual void printClass(){cout << "this is a oil slick" << endl;}
+//    virtual void printClass(){cout << "this is a oil slick" << endl;}
 
 private:
     GhostRacer* GhostR;
@@ -141,7 +143,7 @@ public:
     HolyWater(int id, double x, double y, GhostRacer* ptr2gr);
     virtual void doSomething();
     virtual void affectedBySpray();
-    virtual void printClass(){cout << "this is a holy water" << endl;}
+//    virtual void printClass(){cout << "this is a holy water" << endl;}
     
 private:
     GhostRacer* GhostR;
@@ -155,7 +157,7 @@ public:
     void isActivated();
     void setActivation(){activated = true;}
     virtual void affectedBySpray(){};
-    virtual void printClass(){cout << "this is a spray" << endl;}
+//    virtual void printClass(){cout << "this is a spray" << endl;}
     
 private:
     GhostRacer* GhostR;
@@ -170,7 +172,7 @@ public:
     Soul(int id, double x, double y, GhostRacer* ptr2gr);
     virtual void doSomething();
     virtual void affectedBySpray(){};
-    virtual void printClass(){cout << "this is a soul" << endl;}
+//    virtual void printClass(){cout << "this is a soul" << endl;}
 
 private:
     GhostRacer* GhostR;
@@ -182,7 +184,7 @@ public:
     HealingGoodie(int id, double x, double y, GhostRacer* ptr2gr);
     virtual void doSomething();
     virtual void affectedBySpray();
-    virtual void printClass(){cout << "this is a healing goodie" << endl;}
+//    virtual void printClass(){cout << "this is a healing goodie" << endl;}
 
 private:
     GhostRacer* GhostR;
@@ -191,10 +193,10 @@ private:
 class ZomCab: public Actor
 {
 public:
-    ZomCab(int id, double x, double y, GhostRacer* ptr2gr);
+    ZomCab(int id, double x, double y, GhostRacer* ptr2gr, double startSpeed);
     virtual void doSomething();
-    virtual void affectedBySpray(){};
-    virtual void printClass(){cout << "this is a zombie car" << endl;}
+    virtual void affectedBySpray();
+//    virtual void printClass(){cout << "this is a zombie car" << endl;}
     
 private:
     GhostRacer* GhostR;
@@ -208,7 +210,7 @@ public:
     forTestZomCab(int id, double x, double y, GhostRacer* ptr2gr);
     virtual void doSomething(){};
     virtual void affectedBySpray(){};
-    virtual void printClass(){cout << "this is a test figure for zombie car" << endl;}
+//    virtual void printClass(){cout << "this is a test figure for zombie car" << endl;}
     
 private:
     GhostRacer* GhostR;
